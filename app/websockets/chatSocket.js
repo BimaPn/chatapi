@@ -11,9 +11,16 @@ const chatSocketHandlers = (io) => {
     await Message.create({
       senderId:userId,
       receiverId:to,
-      message
+      message:msg.message
     });
-    socket.to(to).to(userId).emit("message",{message,from:userId});
+    const chat = {
+      id:userId,
+      name:socket.user.name,
+      time:message.time,
+      image:"/images/people/1.jpg",
+      message:message.message,
+    }
+    socket.to(to).to(userId).emit("message",{message,from:chat});
   });
 
     socket.on("disconnect",(msg) => console.log(`${userId} disconnect`));
