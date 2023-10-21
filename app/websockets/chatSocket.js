@@ -11,7 +11,7 @@ const chatSocketHandlers = (io) => {
     await Message.create({
       senderId:userId,
       receiverId:to,
-      message:msg.message
+      message:message.message
     });
     const chat = {
       id:userId,
@@ -20,7 +20,7 @@ const chatSocketHandlers = (io) => {
       image:"/images/people/1.jpg",
       message:message.message,
     }
-    socket.to(to).to(userId).emit("message",{message,from:chat});
+    socket.to(to).to(userId).emit("message",{message:message.message,from:chat});
   });
 
     socket.on("disconnect",(msg) => console.log(`${userId} disconnect`));
