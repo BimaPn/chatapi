@@ -1,6 +1,7 @@
 import Message from "../models/Message.js";
 import User from "../models/User.js"
 import { dateToTime } from '../utils/converter.js'
+import client from "../lib/redis/redisConnect.js";
 
 export const getUserMessages = async (req,res) => {
   const target = req.params.id;
@@ -14,9 +15,6 @@ export const getUserMessages = async (req,res) => {
     }
   ).sort({createdAt:1}).exec();
 
-  if(!messages) {
-    return res.json({messages:[]});
-  }
   let newMessages = messages.map((item) => {
     return {
       id:item._id,
@@ -66,6 +64,8 @@ export const getUsersList = async (req,res) => {
   if(!users) {
     return res.json({users:[]});
   }
+
+  // !! TEMPORARY SOLUTION, YOU MUST CHANGE LATER 
   const result = await Promise.all(users.map( async (data) => {
     const user = await User.findOne(
       {_id:data.senderId === userId ? data.receiverId : data.senderId }).exec();
@@ -75,9 +75,12 @@ export const getUsersList = async (req,res) => {
       name:user.name,
       image:"/images/people/1.jpg",
       message:data.message,
-      time:dateToTime(data.createdAt)
+      time:dateToTime(data.createdAt),
+      unread: await client.get(`unread:${req.user.id}-${user.id}`)
     }
   }));
+  // TEMPORARY SOLUTION, YOU MUST CHANGE LATER !!
+
   res.status(200).json({users:result});
 }
 

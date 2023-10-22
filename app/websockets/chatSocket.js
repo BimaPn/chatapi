@@ -1,4 +1,6 @@
+import client from "../lib/redis/redisConnect.js";
 import Message from "../models/Message.js";
+import User from "../models/User.js";
 
 const chatSocketHandlers = (io) => {
   const chat = io.of("/chat");
@@ -7,23 +9,35 @@ const chatSocketHandlers = (io) => {
     console.log(`${userId} connect`);
     socket.join(userId);
 
-  socket.on("message",async ({message,to}) => {
-    await Message.create({
-      senderId:userId,
-      receiverId:to,
-      message:message.message
-    });
-    const chat = {
-      id:userId,
-      name:socket.user.name,
-      time:message.time,
-      image:"/images/people/1.jpg",
-      message:message.message,
-    }
-    socket.to(to).to(userId).emit("message",{message:message.message,from:chat});
-  });
+    socket.on("message",async ({message,to}) => {
+      await Message.create({
+        senderId:userId,
+        receiverId:to,
+        message:message.message
+      });
 
+      // !! TEMPORARY SOLUTION, YOU MUST CHANGE LATER 
+      const chat = {
+        id:userId,
+        name:socket.user.name,
+        time:message.time,
+        image:"/images/people/1.jpg",
+        message:message.message,
+        unread: await client.incrBy(`unread:${to}-${userId}`,1)
+      }
+      // TEMPORARY SOLUTION, YOU MUST CHANGE LATER !!
+
+      socket.to(to).to(userId).emit("message",{message:message.message,from:chat});
+    });
+
+    // !! TEMPORARY SOLUTION, YOU MUST CHANGE LATER 
+    socket.on("messagesRead", async (target) => {
+      await client.del(`unread:${userId}-${target}`);
+    })
+    // TEMPORARY SOLUTION, YOU MUST CHANGE LATER !!
+    
     socket.on("disconnect",(msg) => console.log(`${userId} disconnect`));
   });
 }
+
 export default chatSocketHandlers;
