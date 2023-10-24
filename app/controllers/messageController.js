@@ -73,7 +73,7 @@ export const getUsersList = async (req,res) => {
     return {
       id:user.id,
       name:user.name,
-      image:"/images/people/1.jpg",
+      avatar:user.avatar,
       message:data.message,
       time:dateToTime(data.createdAt),
       unread: await client.get(`unread:${req.user.id}-${user.id}`)

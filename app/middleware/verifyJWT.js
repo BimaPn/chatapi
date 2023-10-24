@@ -9,7 +9,7 @@ export const verifyToken = (req, res, next) => {
         token,
         process.env.ACCESS_TOKEN_SECRET,
         (err, decoded) => {
-            if (err) return res.sendStatus(403); //invalid token
+            if (err) return res.sendStatus(403); 
             req.user = decoded.userInfo;
             next();
         }
@@ -22,7 +22,7 @@ export const socketAuth = async (socket,next) => {
       token,
       process.env.ACCESS_TOKEN_SECRET,
       (err, decoded) => {
-          if (err) return next(new Error("Access Denied. Token is invalid.")); //invalid token
+          if (err) return next(new Error("Access Denied. Token is invalid.")); 
           socket.user = decoded.userInfo;
           next();
       }

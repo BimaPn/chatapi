@@ -10,7 +10,7 @@ export const handleLogin = async (req, res) => {
     return res.status(400).json({message : "Email and password are required"}); 
   } 
   const foundUser = await User.findOne({ email }).exec();
-  if(!foundUser) return res.status(401).json({message : "User not found"}); //Unauthorized
+  if(!foundUser) return res.status(401).json({message : "User not found"}); 
   
   const match = await bcrypt.compare(password,foundUser.password);
   if(!match) {
@@ -22,7 +22,7 @@ export const handleLogin = async (req, res) => {
       userInfo : {
         id : foundUser.id,
         name : foundUser.name,
-        email : foundUser.email,
+        avatar : foundUser.avatar,
       }
     },
     process.env.ACCESS_TOKEN_SECRET,
@@ -42,7 +42,9 @@ export const handleLogin = async (req, res) => {
   res.json({
     id:foundUser.id,
     name:foundUser.name,
-    email:foundUser.email,  
+    email:foundUser.email,
+    avatar:foundUser.avatar,
+    bio:foundUser.bio,
     accessToken
   });
 }
@@ -62,11 +64,11 @@ export const handleRefreshToken = async (req, res) => {
             if (err || foundUser.email !== decoded.email) return res.sendStatus(403);
             const accessToken = sign(
                 {
-          userInfo : {
-          id : foundUser.id,
-          name : foundUser.name,
-          email : foundUser.email,
-        }
+                  userInfo : {
+                  id : foundUser.id,
+                  name : foundUser.name,
+                  avatar : foundUser.avatar,
+                  } 
                 },
                 process.env.ACCESS_TOKEN_SECRET,
                 { expiresIn: '5d' }

@@ -20,8 +20,8 @@ const chatSocketHandlers = (io) => {
       const chat = {
         id:userId,
         name:socket.user.name,
-        time:message.time,
-        image:"/images/people/1.jpg",
+        createdAt:message.createdAt,
+        avatar:socket.user.avatar,
         message:message.message,
         unread: await client.incrBy(`unread:${to}-${userId}`,1)
       }
@@ -30,11 +30,9 @@ const chatSocketHandlers = (io) => {
       socket.to(to).to(userId).emit("message",{message:message.message,from:chat});
     });
 
-    // !! TEMPORARY SOLUTION, YOU MUST CHANGE LATER 
     socket.on("messagesRead", async (target) => {
       await client.del(`unread:${userId}-${target}`);
     })
-    // TEMPORARY SOLUTION, YOU MUST CHANGE LATER !!
     
     socket.on("disconnect",(msg) => console.log(`${userId} disconnect`));
   });
