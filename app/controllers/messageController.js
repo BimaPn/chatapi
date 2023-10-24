@@ -20,7 +20,7 @@ export const getUserMessages = async (req,res) => {
       id:item._id,
       message:item.message,
       isCurrentUser: item.senderId === req.user.id ? true : false,
-      time: dateToTime(item.createdAt)
+      createdAt: dateToTime(item.createdAt)
     }
   });
   res.status(200).json({
@@ -75,7 +75,7 @@ export const getUsersList = async (req,res) => {
       name:user.name,
       avatar:user.avatar,
       message:data.message,
-      time:dateToTime(data.createdAt),
+      createdAt:dateToTime(data.createdAt),
       unread: await client.get(`unread:${req.user.id}-${user.id}`)
     }
   }));
