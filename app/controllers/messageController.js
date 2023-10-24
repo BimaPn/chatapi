@@ -23,9 +23,21 @@ export const getUserMessages = async (req,res) => {
       createdAt: dateToTime(item.createdAt)
     }
   });
+
+  const userTarget = await User.findOneFilter({_id:target}).exec();
+  if(!userTarget) return res.status(404).json({message:"User not found."})
+
+  const {_id,name,avatar,bio} = userTarget;
+
   res.status(200).json({
       message:"Success.",
-      messages:newMessages
+      user:{
+        id:_id,
+        name,
+        avatar,
+        bio
+      },
+      messages:newMessages,
     });
 }
 
