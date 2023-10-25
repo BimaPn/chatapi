@@ -4,10 +4,12 @@ import User from "../models/User.js";
 
 const chatSocketHandlers = (io) => {
   const chat = io.of("/chat");
-  chat.on("connection",(socket) => {
+  chat.on("connection",async (socket) => {
     const userId = socket.user.id;
     console.log(`${userId} connect`);
     socket.join(userId);
+    socket.broadcast.emit("onlineUser",socket.user.id,true);
+    await client.set(`online:${userId}`,true);
 
     socket.on("message",async ({message,to}) => {
       await Message.create({
@@ -16,16 +18,14 @@ const chatSocketHandlers = (io) => {
         message:message.message
       });
 
-      // !! TEMPORARY SOLUTION, YOU MUST CHANGE LATER 
       const chat = {
         id:userId,
         name:socket.user.name,
         createdAt:message.createdAt,
         avatar:socket.user.avatar,
         message:message.message,
-        unread: await client.incrBy(`unread:${to}-${userId}`,1)
+        unread: await client.incrBy(`unread:${to}-${userId}`,1),
       }
-      // TEMPORARY SOLUTION, YOU MUST CHANGE LATER !!
 
       socket.to(to).to(userId).emit("message",{message:message.message,from:chat});
     });
@@ -34,7 +34,11 @@ const chatSocketHandlers = (io) => {
       await client.del(`unread:${userId}-${target}`);
     })
     
-    socket.on("disconnect",(msg) => console.log(`${userId} disconnect`));
+    socket.on("disconnect",async (msg) => {
+      socket.broadcast.emit("onlineUser",socket.user.id,false);
+      await client.del(`online:${userId}`);
+      console.log(`${userId} disconnect`);
+    });
   });
 }
 

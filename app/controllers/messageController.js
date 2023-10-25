@@ -88,7 +88,8 @@ export const getUsersList = async (req,res) => {
       avatar:user.avatar,
       message:data.message,
       createdAt:dateToTime(data.createdAt),
-      unread: await client.get(`unread:${req.user.id}-${user.id}`)
+      unread: await client.get(`unread:${req.user.id}-${user.id}`),
+      isOnline : await client.exists(`online:${user.id}`)
     }
   }));
   // TEMPORARY SOLUTION, YOU MUST CHANGE LATER !!
