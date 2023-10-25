@@ -9,7 +9,7 @@ const chatSocketHandlers = (io) => {
     console.log(`${userId} connect`);
     socket.join(userId);
     socket.broadcast.emit("onlineUser",socket.user.id,true);
-    await client.set(`online:${userId}`,true);
+    await client.set(`online:${userId}`,1);
 
     socket.on("message",async ({message,to}) => {
       await Message.create({
