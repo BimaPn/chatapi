@@ -28,16 +28,18 @@ export const getUserMessages = async (req,res) => {
   if(!userTarget) return res.status(404).json({message:"User not found."})
 
   const {_id,name,avatar,bio} = userTarget;
-
+  const isOnline = await client.exists(`online:${_id}`) 
+  console.log(isOnline)
   res.status(200).json({
-      message:"Success.",
-      user:{
-        id:_id,
-        name,
-        avatar,
-        bio
-      },
-      messages:newMessages,
+    message:"Success.",
+    user:{
+      id:_id,
+      name,
+      avatar,
+      bio
+    },
+    messages:newMessages,
+    isOnline: isOnline
     });
 }
 
