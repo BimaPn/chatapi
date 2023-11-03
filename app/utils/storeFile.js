@@ -19,5 +19,5 @@ export const saveFile = async (file,filePath) => {
     if(err) throw new Error(err);
   });
 
-  return `${process.env.APP_URL}/public/${filePath}/${uniqueSuffix}`
+  return `${process.env.APP_URL}/${filePath}/${uniqueSuffix}`
 }

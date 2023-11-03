@@ -24,8 +24,6 @@ const chatSocketHandlers = (io) => {
         for(const image of message.images) {
           savedImages.push(await saveFile(image,"images/chat"));
         }
-        console.log(savedImages);
-
         content = {images : savedImages};
       }
 
