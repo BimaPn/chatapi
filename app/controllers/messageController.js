@@ -16,9 +16,15 @@ export const getUserMessages = async (req,res) => {
   ).sort({createdAt:1}).exec();
 
   let newMessages = messages.map((item) => {
+    let content = {};
+    if(item.images.length !== 0) {
+      content = {images : item.images};
+    }else {
+      content = {message : item.message};
+    }
     return {
       id:item._id,
-      message:item.message,
+      ...content,
       isCurrentUser: item.senderId === req.user.id ? true : false,
       createdAt: dateToTime(item.createdAt)
     }
@@ -88,7 +94,7 @@ export const getUsersList = async (req,res) => {
       id:user.id,
       name:user.name,
       avatar:user.avatar,
-      message:data.message,
+      message:data.message? data.message : "images",
       createdAt:dateToTime(data.createdAt),
       unread: await client.get(`unread:${req.user.id}-${user.id}`),
       isOnline : await client.exists(`online:${user.id}`)
