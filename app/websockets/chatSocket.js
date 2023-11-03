@@ -26,27 +26,28 @@ const chatSocketHandlers = (io) => {
         }
         content = {images : savedImages};
       }
-
-      await Message.create({
+      
+      const finalMessage = {
         senderId:userId,
         receiverId:to,
         ...content
-      }).catch((err) => {
+      }    
+      await Message.create(finalMessage).catch((err) => {
         socket.emit("messageError",err);
         console.log(err);
         return;
       });
 
-      // const chat = {
-      //   id:userId,
-      //   name:socket.user.name,
-      //   createdAt:message.createdAt,
-      //   avatar:socket.user.avatar,
-      //   message:message.message,
-      //   unread: await client.incrBy(`unread:${to}-${userId}`,1),
-      // }
-      //
-      // socket.to(to).to(userId).emit("message",{message:message.message,from:chat});
+      const chat = {
+        id:userId,
+        name:socket.user.name,
+        createdAt:message.createdAt,
+        avatar:socket.user.avatar,
+        message:message.message ? message.message : "images",
+        unread: await client.incrBy(`unread:${to}-${userId}`,1),
+      }
+
+      socket.to(to).to(userId).emit("message",{content,from:chat});
     });
 
     socket.on("messagesRead", async (target) => {
