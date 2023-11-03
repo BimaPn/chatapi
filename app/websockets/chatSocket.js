@@ -1,6 +1,10 @@
 import client from "../lib/redis/redisConnect.js";
 import Message from "../models/Message.js";
 import User from "../models/User.js";
+import { initMulter } from "../utils/diskStorage.js";
+import {writeFile} from "fs"
+import path from "path";
+import { saveFile } from "../utils/storeFile.js";
 
 const chatSocketHandlers = (io) => {
   const chat = io.of("/chat");
@@ -12,22 +16,39 @@ const chatSocketHandlers = (io) => {
     await client.set(`online:${userId}`,1);
 
     socket.on("message",async ({message,to}) => {
+      let content = {};
+      if("message" in message) {
+        content = {message : message.message};
+      }else {
+        const savedImages = [];
+        for(const image of message.images) {
+          savedImages.push(await saveFile(image,"images/chat"));
+        }
+        console.log(savedImages);
+
+        content = {images : savedImages};
+      }
+
       await Message.create({
         senderId:userId,
         receiverId:to,
-        message:message.message
+        ...content
+      }).catch((err) => {
+        socket.emit("messageError",err);
+        console.log(err);
+        return;
       });
 
-      const chat = {
-        id:userId,
-        name:socket.user.name,
-        createdAt:message.createdAt,
-        avatar:socket.user.avatar,
-        message:message.message,
-        unread: await client.incrBy(`unread:${to}-${userId}`,1),
-      }
-
-      socket.to(to).to(userId).emit("message",{message:message.message,from:chat});
+      // const chat = {
+      //   id:userId,
+      //   name:socket.user.name,
+      //   createdAt:message.createdAt,
+      //   avatar:socket.user.avatar,
+      //   message:message.message,
+      //   unread: await client.incrBy(`unread:${to}-${userId}`,1),
+      // }
+      //
+      // socket.to(to).to(userId).emit("message",{message:message.message,from:chat});
     });
 
     socket.on("messagesRead", async (target) => {
