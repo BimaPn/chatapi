@@ -1,5 +1,6 @@
 import pkg from 'jsonwebtoken';
-const { verify} = pkg;
+import { getUserCache } from '../lib/redis/cacheQueries.js';
+const { verify } = pkg;
 
 export const verifyToken = (req, res, next) => {
     const authHeader = req.headers.authorization || req.headers.Authorization;
@@ -10,7 +11,7 @@ export const verifyToken = (req, res, next) => {
         process.env.ACCESS_TOKEN_SECRET,
         (err, decoded) => {
             if (err) return res.sendStatus(403); 
-            req.user = decoded.userInfo;
+            req.user = decoded.user;
             next();
         }
     );
@@ -23,7 +24,7 @@ export const socketAuth = async (socket,next) => {
       process.env.ACCESS_TOKEN_SECRET,
       (err, decoded) => {
           if (err) return next(new Error("Access Denied. Token is invalid.")); 
-          socket.user = decoded.userInfo;
+          socket.user = getUserCache(decoded.user.id);
           next();
       }
   );

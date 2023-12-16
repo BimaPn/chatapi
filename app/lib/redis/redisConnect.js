@@ -1,6 +1,8 @@
 import { createClient } from "redis";
 
-const client = createClient();
+const client = createClient({
+  legacyMode:false
+});
 
 client.on('error', err => console.log('Redis Client Error', err));
 

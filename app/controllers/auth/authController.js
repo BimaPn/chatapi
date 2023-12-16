@@ -2,6 +2,7 @@ import User from "../../models/User.js"
 import bcrypt from "bcrypt"
 import pkg from 'jsonwebtoken';
 import client from "../../lib/redis/redisConnect.js"
+import { getUserCache } from "../../lib/redis/cacheQueries.js";
 const { verify,sign } = pkg;
 
 export const handleLogin = async (req, res) => {
@@ -19,15 +20,14 @@ export const handleLogin = async (req, res) => {
 
   const accessToken = sign(
     {
-      userInfo : {
+      user : {
         id : foundUser.id,
-        name : foundUser.name,
-        avatar : foundUser.avatar,
       }
     },
     process.env.ACCESS_TOKEN_SECRET,
     { expiresIn : "5d" }
   );
+
   const refreshToken = sign(
     {email : foundUser.email},
     process.env.REFRESH_TOKEN_SECRET,
@@ -39,12 +39,13 @@ export const handleLogin = async (req, res) => {
   
   res.cookie("jwt",refreshToken,{ httpOnly : true,sameSite : "None",maxAge: 24 * 60 * 60 * 1000 });
 
+  const result = await getUserCache(foundUser.id).catch((err) => {
+    return res.status(500).json({message : "Internal server error."})
+  });
+
+  console.log(result);
   res.json({
-    id:foundUser.id,
-    name:foundUser.name,
-    email:foundUser.email,
-    avatar:foundUser.avatar,
-    bio:foundUser.bio,
+    ...result,
     accessToken
   });
 }
@@ -64,10 +65,8 @@ export const handleRefreshToken = async (req, res) => {
             if (err || foundUser.email !== decoded.email) return res.sendStatus(403);
             const accessToken = sign(
                 {
-                  userInfo : {
-                  id : foundUser.id,
-                  name : foundUser.name,
-                  avatar : foundUser.avatar,
+                  user : {
+                    id : foundUser.id,
                   } 
                 },
                 process.env.ACCESS_TOKEN_SECRET,
@@ -94,6 +93,7 @@ export const handleLogout = async (req, res) => {
     await foundUser.save();
     // --
 
+    await client.hDel(`users:${foundUser.id}`);
     res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
     res.status(200).json({message : "success"});
 }
