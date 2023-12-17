@@ -8,11 +8,11 @@ import path from "path";
 const chatSocketHandlers = (io) => {
   const chat = io.of("/chat");
   chat.on("connection",async (socket) => {
-    const userId = socket.user.id;
-    console.log(`${userId} connect`);
-    socket.join(userId);
-    socket.broadcast.emit("onlineUser",socket.user.id,true);
-    await client.set(`online:${userId}`,1);
+    const username = socket.user.username;
+    console.log(`${username} connect`);
+    socket.join(username);
+    socket.broadcast.emit("onlineUser",username,true);
+    await client.set(`online:${username}`,1);
 
     socket.on("message",async ({message,to}) => {
       let content = {};
@@ -27,8 +27,8 @@ const chatSocketHandlers = (io) => {
       }
       
       const finalMessage = {
-        senderId:userId,
-        receiverId:to,
+        sender:username,
+        receiver:to,
         ...content
       }    
       await Message.create(finalMessage).catch((err) => {
@@ -38,25 +38,25 @@ const chatSocketHandlers = (io) => {
       });
 
       const chat = {
-        id:userId,
+        username:username,
         name:socket.user.name,
         createdAt:message.createdAt,
         avatar:socket.user.avatar,
         message:message.message ? message.message : "images",
-        unread: await client.incrBy(`unread:${to}-${userId}`,1),
+        unread: await client.incrBy(`unread:${to}-${username}`,1),
       }
 
-      socket.to(to).to(userId).emit("message",{content,from:chat});
+      socket.to(to).to(username).emit("message",{content,from:chat});
     });
 
     socket.on("messagesRead", async (target) => {
-      await client.del(`unread:${userId}-${target}`);
+      await client.del(`unread:${username}-${target}`);
     })
     
     socket.on("disconnect",async (msg) => {
-      socket.broadcast.emit("onlineUser",socket.user.id,false);
-      await client.del(`online:${userId}`);
-      console.log(`${userId} disconnect`);
+      socket.broadcast.emit("onlineUser",username,false);
+      await client.del(`online:${username}`);
+      console.log(`${username} disconnect`);
     });
   });
 }

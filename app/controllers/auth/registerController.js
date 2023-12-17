@@ -1,14 +1,19 @@
 import User from "../../models/User.js"
 import bcrypt from "bcrypt"
+import { isValidUsername } from "../../utils/validations.js";
 
 export const handleNewUser = async (req, res) => {
-  const { name,email,password,password_confirmation } = req.body;
+  const { name, email, username, password, password_confirmation } = req.body;
   if(password !== password_confirmation) {
-    return res.status(400).json({password_confirmation : "Password confirmation is incorrect"});
+    return res.status(400).json({message : "Password confirmation is incorrect"});
   }
-  if(!email || !password || !name) {
-    return res.status(400).json({message : "email or password or name is required"}); 
-  } 
+
+  const usernameValidation = await isValidUsername(username);
+
+  if(!usernameValidation.isValid) {
+    return res.status(400).json({message : usernameValidation.message});
+  }
+
   const duplicate = await User.findOne({ email }).exec();
   if(duplicate) return res.status(409).json({message:"Account is already exist."}); //conflict
   
@@ -19,6 +24,7 @@ export const handleNewUser = async (req, res) => {
   await User.create({
     name,
     email,
+    username,
     password : hashedPwd
   });
 

@@ -24,7 +24,7 @@ export const socketAuth = async (socket,next) => {
       process.env.ACCESS_TOKEN_SECRET,
       async (err, decoded) => {
           if (err) return next(new Error("Access Denied. Token is invalid.")); 
-          socket.user = await getUserCache(decoded.user.id);
+          socket.user = await getUserCache(decoded.user.username);
           next();
       }
   );

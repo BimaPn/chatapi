@@ -22,7 +22,7 @@ export const handleLogin = async (req, res) => {
   const accessToken = sign(
     {
       user : {
-        id : foundUser.id,
+        username : foundUser.username,
       }
     },
     process.env.ACCESS_TOKEN_SECRET,
@@ -40,11 +40,10 @@ export const handleLogin = async (req, res) => {
   
   res.cookie("jwt",refreshToken,{ httpOnly : true,sameSite : "None",maxAge: 24 * 60 * 60 * 1000 });
 
-  const result = await getUserCache(foundUser.id).catch((err) => {
+  const result = await getUserCache(foundUser.username).catch((err) => {
     return res.status(500).json({message : "Internal server error."})
   });
 
-  console.log(result);
   res.json({
     ...result,
     accessToken
@@ -67,7 +66,7 @@ export const handleRefreshToken = async (req, res) => {
             const accessToken = sign(
                 {
                   user : {
-                    id : foundUser.id,
+                    username : foundUser.username,
                   } 
                 },
                 process.env.ACCESS_TOKEN_SECRET,

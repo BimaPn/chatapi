@@ -2,7 +2,6 @@ import {fileTypeFromBuffer} from 'file-type';
 import path from "path";
 import {writeFile} from "fs"
 import multer from "multer";
-import path from 'path';
 
 export const initMulter = ({destination,fileSizeLimit = 6*(1024*1024),length}) => {
   const storage = multer.diskStorage({

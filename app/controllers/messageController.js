@@ -4,13 +4,13 @@ import { dateToTime } from '../utils/converter.js'
 import client from "../lib/redis/redisConnect.js";
 
 export const getUserMessages = async (req,res) => {
-  const target = req.params.id;
+  const target = req.params.username;
 
   const messages = await Message.find(
     {
       $or: [
-        {senderId:req.user.id,receiverId:target},
-        {senderId:target,receiverId:req.user.id}
+        {sender:req.user.username,receiver:target},
+        {sender:target,receiver:req.user.username}
       ]
     }
   ).sort({createdAt:1}).exec();
@@ -30,15 +30,15 @@ export const getUserMessages = async (req,res) => {
     }
   });
 
-  const userTarget = await User.findOneFilter({_id:target}).exec();
+  const userTarget = await User.findOneFilter({username:target}).exec();
   if(!userTarget) return res.status(404).json({message:"User not found."})
 
-  const {_id,name,avatar,bio} = userTarget;
-  const isOnline = await client.exists(`online:${_id}`) 
+  const {username,name,avatar,bio} = userTarget;
+  const isOnline = await client.exists(`online:${username}`) 
   res.status(200).json({
     message:"Success.",
     user:{
-      id:_id,
+      username,
       name,
       avatar,
       bio
@@ -49,13 +49,13 @@ export const getUserMessages = async (req,res) => {
 }
 
 export const getUsersList = async (req,res) => {
-  const userId = req.user.id;
+  const username = req.user.username;
   const users = await Message.aggregate([
     {
         $match: {
             $or: [
-                { senderId: userId},
-                { receiverId: userId }
+                { sender: username},
+                { receiver: username }
             ]
         }
     },
@@ -68,9 +68,9 @@ export const getUsersList = async (req,res) => {
         $group: {
             _id: {
                 $cond: {
-                    if: { $eq: ["$senderId", userId] },
-                    then: "$receiverId",
-                    else: "$senderId"
+                    if: { $eq: ["$sender", username] },
+                    then: "$receiver",
+                    else: "$sender"
                 }
             },
             lastMessage: { $first: "$$ROOT" }
@@ -80,6 +80,7 @@ export const getUsersList = async (req,res) => {
         $replaceRoot: { newRoot: "$lastMessage" }
     }
   ]);
+
   if(!users) {
     return res.json({users:[]});
   }
@@ -87,16 +88,16 @@ export const getUsersList = async (req,res) => {
   // !! TEMPORARY SOLUTION, YOU MUST CHANGE LATER 
   const result = await Promise.all(users.map( async (data) => {
     const user = await User.findOne(
-      {_id:data.senderId === userId ? data.receiverId : data.senderId }).exec();
+      {username:data.sender === username ? data.receiver : data.sender }).exec();
 
     return {
-      id:user.id,
+      username : user.username,
       name:user.name,
       avatar:user.avatar,
       message:data.message? data.message : "images",
       createdAt:dateToTime(data.createdAt),
-      unread: await client.get(`unread:${req.user.id}-${user.id}`),
-      isOnline : await client.exists(`online:${user.id}`)
+      unread: await client.get(`unread:${req.user.username}-${user.username}`),
+      isOnline : await client.exists(`online:${user.username}`)
     }
   }));
   // TEMPORARY SOLUTION, YOU MUST CHANGE LATER !!
