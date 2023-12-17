@@ -1,10 +1,9 @@
 import client from "../lib/redis/redisConnect.js";
 import Message from "../models/Message.js";
 import User from "../models/User.js";
-import { initMulter } from "../utils/diskStorage.js";
+import { initMulter, saveFile } from "../utils/storage.js";
 import {writeFile} from "fs"
 import path from "path";
-import { saveFile } from "../utils/storeFile.js";
 
 const chatSocketHandlers = (io) => {
   const chat = io.of("/chat");

@@ -3,7 +3,7 @@ import bcrypt from "bcrypt"
 import pkg from 'jsonwebtoken';
 import client from "../../lib/redis/redisConnect.js"
 import { getUserCache } from "../../lib/redis/cacheQueries.js";
-import { isValidUsername } from "../../utils/validations.util.js";
+import { isValidUsername } from "../../utils/validations.js";
 const { verify,sign } = pkg;
 
 export const handleLogin = async (req, res) => {
