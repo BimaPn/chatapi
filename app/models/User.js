@@ -5,7 +5,8 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema({
   _id : {type:String,default:uuid},
-  name : {type : String,required : true},
+  name : {type : String, required : true},
+  username : {type : String, unique : true, index : true, required : true},
   bio : {type : String,required : false,default : null},
   avatar : {type : String,required : false,default : `${process.env.APP_URL}/images/users/default.jpg`},
   email : {type : String,required : true},

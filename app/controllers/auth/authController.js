@@ -3,6 +3,7 @@ import bcrypt from "bcrypt"
 import pkg from 'jsonwebtoken';
 import client from "../../lib/redis/redisConnect.js"
 import { getUserCache } from "../../lib/redis/cacheQueries.js";
+import { isValidUsername } from "../../utils/validations.util.js";
 const { verify,sign } = pkg;
 
 export const handleLogin = async (req, res) => {
@@ -75,6 +76,18 @@ export const handleRefreshToken = async (req, res) => {
             res.json({  accessToken })
         }
     );
+}
+
+export const usernameCheck = async (req, res) => {
+  const { username } = req.body;
+  
+  const result = await isValidUsername(username);
+
+  if(!result.isValid) {
+    return res.status(400).json({message : result.message}); 
+  }
+  
+  res.json({message : result.message});
 }
 
 export const handleLogout = async (req, res) => {
