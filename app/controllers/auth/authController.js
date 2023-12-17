@@ -43,7 +43,6 @@ export const handleLogin = async (req, res) => {
   const result = await getUserCache(foundUser.username).catch((err) => {
     return res.status(500).json({message : "Internal server error."})
   });
-
   res.json({
     ...result,
     accessToken

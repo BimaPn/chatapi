@@ -6,14 +6,12 @@ export const getUserCache = async (username) => {
   if(user) {
     return user;
   }  
-  
   let foundUser = await User.findOne({ username })
     .select({_id:0,name:1,username:1,email:1,avatar:1,bio:1}).exec();
 
   if(!foundUser) throw new Error("User not found.");    
 
   const result = {
-    id:userId,
     ...foundUser._doc
   }
 
