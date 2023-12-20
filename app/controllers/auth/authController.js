@@ -38,7 +38,11 @@ export const handleLogin = async (req, res) => {
   foundUser.refreshToken = refreshToken;
   await foundUser.save();
   
-  res.cookie("jwt",refreshToken,{ httpOnly : true,sameSite : "None",maxAge: 24 * 60 * 60 * 1000 });
+  res.cookie("jwt","shit",{
+    httpOnly : false,
+    sameSite : "None",
+    secure: false,
+    maxAge: 24 * 60 * 60 * 30 });
 
   const result = await getUserCache(foundUser.username).catch((err) => {
     return res.status(500).json({message : "Internal server error."})
@@ -91,21 +95,23 @@ export const usernameCheck = async (req, res) => {
 export const handleLogout = async (req, res) => {
     const cookies = req.cookies;
     if (!cookies?.jwt) return res.sendStatus(204); //No content
+
     const refreshToken = cookies.jwt;
     
     // -- TEMPORARY SOLUTION, PLEASE CHANGE IT LATER 
     const foundUser = await User.findOne({ refreshToken }).exec();
     if (!foundUser) {
-        res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
+        res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure:false });
         return res.sendStatus(204);
     }
 
     foundUser.refreshToken = '';
+    console.log(foundUser)
     await foundUser.save();
     // --
 
     await client.hDel(`users:${foundUser.id}`);
-    res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
+    res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure:false });
     res.status(200).json({message : "success"});
 }
 

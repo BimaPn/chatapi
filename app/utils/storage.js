@@ -1,9 +1,9 @@
 import {fileTypeFromBuffer} from 'file-type';
 import path from "path";
-import {writeFile} from "fs"
+import { writeFile,unlink } from "fs"
 import multer from "multer";
 
-export const initMulter = ({destination,fileSizeLimit = 6*(1024*1024),length}) => {
+export const initMulter = (destination,fileSizeLimit = 6*(1024*1024)) => {
   const storage = multer.diskStorage({
       destination: function(req, file, cb) {
         cb(null, path.join(__basedir, `/public/${destination}`)); 
@@ -13,10 +13,10 @@ export const initMulter = ({destination,fileSizeLimit = 6*(1024*1024),length}) =
         cb(null, uniqueSuffix + path.extname(file.originalname)); 
       }
   });
-  return multer({
+  return multer({ 
     storage,
     limits:{fileSize:fileSizeLimit},
-  }).array("images",length);
+  });
 }
 
 export const saveFile = async (file,filePath) => {
@@ -37,4 +37,12 @@ export const saveFile = async (file,filePath) => {
   });
 
   return `${process.env.APP_URL}/${filePath}/${uniqueSuffix}`
+}
+
+export const deleteFile = (destination) => {
+  unlink(destination, (err) => {
+  if (err) {
+    throw err;
+  }
+});
 }
