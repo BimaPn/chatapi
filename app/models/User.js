@@ -10,31 +10,39 @@ const userSchema = new Schema({
   },
   name : {
     type : String,
-    minLength : 4,
-    maxLength : 26,
-    required : true
+    minLength : [4, "Please enter a valid name with at least 4 characters."],
+    maxLength : [26, "Name must not exceed 26 characters."],
+    required : [true, "Name is required."]
   },
   username : {
     type : String,
     unique : true,
     index : true,
-    minLength : 6,
-    maxLength : 24,
-    required : true
+    minLength : [6, "Please enter a valid name with at least 4 characters."],
+    maxLength : [24, "Username must not exceed 24 characters."],
+    required : [true, "Name is required."],
+    validate: {
+      validator: function (value) {
+        return /^[a-zA-Z0-9]+$/.test(value);
+      },
+      message: "Username can only consist of letters or numbers and must not contain spaces.",
+    },
   },
   bio : {
     type : String,
     required : false,
+    minLength : [4, "Please enter a valid bio with at least 4 characters."],
+    maxLength : [50, "Bio must not exceed 50 characters."],
     default : "Hallo everyone !"
   },
   avatar : {
     type : String,
-    required : false,
+    required : [true, "Name is required."],
     default : `${process.env.APP_URL}/images/users/default.jpg`
   },
   email : {
     type : String,
-    required : true,
+    required : [true, "Name is required."],
     unique : true,
     validate: {
       validator: function (value) {
@@ -46,7 +54,7 @@ const userSchema = new Schema({
   password : {
     type : String,
     select : false,
-    required : true
+    required : [true, "Name is required."]
   },
   refreshToken : String,
 });

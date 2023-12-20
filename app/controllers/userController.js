@@ -25,7 +25,12 @@ export const updateUser = async (req,res) => {
     user.avatar = `${process.env.APP_URL}/images/users/${fileName}`;
   }
   
-  await user.save();
+  try {
+    await user.save();
+  } catch (err) {
+   return res.status(400).json({errors:err.errors}); 
+  }
+
   res.json({
     message : 'success',
     user 

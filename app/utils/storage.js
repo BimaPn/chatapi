@@ -3,7 +3,7 @@ import path from "path";
 import { writeFile,unlink } from "fs"
 import multer from "multer";
 
-export const initMulter = (destination,fileSizeLimit = 6*(1024*1024)) => {
+export const initMulter = (destination,fileSizeLimit = (1024*1024)) => {
   const storage = multer.diskStorage({
       destination: function(req, file, cb) {
         cb(null, path.join(__basedir, `/public/${destination}`)); 

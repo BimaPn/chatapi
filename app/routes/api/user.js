@@ -2,8 +2,8 @@ import express from 'express'
 import { updateUser } from '../../controllers/userController.js'
 import { initMulter } from '../../utils/storage.js';
 
-const upload = initMulter("images/users/");
 export const router = express.Router();
+const upload = initMulter("images/users/").single("avatar");
 // router.route("/:username")
 // .post(getUser)
 
@@ -11,7 +11,14 @@ export const router = express.Router();
 
 
 router.route("/:username/update")
-.put(upload.single("avatar"), updateUser);
+.put(function (req, res, next) {
+  upload(req, res, function (err) {
+    if (err) {
+      return res.status(400).json({errors:err})
+    }
+    next();
+  });
+}, updateUser);
 
 // router.route("/:username/delete")
 // .delete(deleteUser);

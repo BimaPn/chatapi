@@ -1,10 +1,15 @@
 const whitelist = ['http://localhost:3000'];
 
 export const corsOptions = {
-    origin:true, 
+    origin: (origin, callback) => {
+        if (whitelist.indexOf(origin) !== -1 || !origin) {
+            callback(null, true)
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     optionsSuccessStatus: 200,
-    credentials: true,
-   preflightContinue: true,
+    credentials: true
 }
 
 
