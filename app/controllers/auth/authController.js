@@ -11,7 +11,7 @@ export const handleLogin = async (req, res) => {
   if(!email || !password) {
     return res.status(400).json({message : "Email and password are required"}); 
   } 
-  const foundUser = await User.findOne({ email }).exec();
+  const foundUser = await User.findOne({ email }).select({password:1,username:1}).exec();
   if(!foundUser) return res.status(401).json({message : "User not found"}); 
   
   const match = await bcrypt.compare(password,foundUser.password);
@@ -39,7 +39,7 @@ export const handleLogin = async (req, res) => {
   await foundUser.save();
   
   res.cookie("jwt","shit",{
-    httpOnly : false,
+    httpOnly : true,
     sameSite : "None",
     secure: false,
     maxAge: 24 * 60 * 60 * 30 });

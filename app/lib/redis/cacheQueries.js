@@ -2,8 +2,9 @@ import client from "./redisConnect.js";
 import User from "../../models/User.js";
 
 export const getUserCache = async (username) => {
-  const user = await client.hGetAll(`users:${username}`);
-  if(user) {
+  const isExist = await client.exists(`users:${username}`);
+  if(isExist) {
+    const user = await client.hGetAll(`users:${username}`);
     return user;
   }  
   let foundUser = await User.findOne({ username })

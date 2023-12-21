@@ -7,9 +7,6 @@ const upload = initMulter("images/users/").single("avatar");
 // router.route("/:username")
 // .post(getUser)
 
-
-
-
 router.route("/:username/update")
 .put(function (req, res, next) {
   upload(req, res, function (err) {
