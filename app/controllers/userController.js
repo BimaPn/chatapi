@@ -1,10 +1,12 @@
 import { v4 as uuid } from "uuid";
 import User from "../models/User.js";
 import { deleteFile } from "../utils/storage.js";
+import client from "../lib/redis/redisConnect.js";
 
 export const updateUser = async (req,res) => {
   const username = req.params.username;
-  const { name, bio, avatar } = req.body;
+  const { name, bio } = req.body;
+  let avatar;
 
   const user = await User.findOne({ username });
   if(!user){
@@ -22,7 +24,8 @@ export const updateUser = async (req,res) => {
     }
 
     const fileName = req.file.filename;
-    user.avatar = `${process.env.APP_URL}/images/users/${fileName}`;
+    avatar = `${process.env.APP_URL}/images/users/${fileName}`;
+    user.avatar = avatar;
   }
   
   try {
@@ -31,6 +34,15 @@ export const updateUser = async (req,res) => {
    return res.status(400).json({errors:err.errors}); 
   }
 
+  try {
+    await client.HSET(`users:${username}`,{
+      name: name,
+      bio: bio,
+      avatar: avatar ? avatar : user.avatar
+    });
+  } catch (err) {
+   return res.status(400).json({errors:err.errors}); 
+  }
   res.json({
     message : 'success',
     user 

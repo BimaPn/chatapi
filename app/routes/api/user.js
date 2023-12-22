@@ -4,8 +4,6 @@ import { initMulter } from '../../utils/storage.js';
 
 export const router = express.Router();
 const upload = initMulter("images/users/").single("avatar");
-// router.route("/:username")
-// .post(getUser)
 
 router.route("/:username/update")
 .put(function (req, res, next) {
@@ -17,7 +15,5 @@ router.route("/:username/update")
   });
 }, updateUser);
 
-// router.route("/:username/delete")
-// .delete(deleteUser);
 
 

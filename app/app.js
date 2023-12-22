@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 import cors from 'cors';
 import { corsOptions } from './config/cors.js';
 import sessionMiddleware from './middleware/session.js';
-import errorHandler from './middleware/errorHandler.js';
+import { errorHandler } from './middleware/errorHandler.js';
 import cookieParser from "cookie-parser"
 import bodyParser from 'body-parser'
 import { router as apiRoutes } from './routes/api/index.js';

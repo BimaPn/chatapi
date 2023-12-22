@@ -14,14 +14,13 @@ const chatSocketHandlers = (io) => {
     await client.set(`online:${username}`,1);
 
     socket.on("message",async ({message,to}) => {
-      console.log("Sending a message")
       let content = {};
       if("message" in message) {
         content = {message : message.message};
       }else {
         const savedImages = [];
         for(const image of message.images) {
-          savedImages.push(await saveFile(image,"images/chat"));
+          savedImages.push(await saveFile(image,"images/message"));
         }
         content = {images : savedImages};
       }

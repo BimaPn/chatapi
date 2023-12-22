@@ -10,7 +10,7 @@ const Message = mongoose.model("Message",new Schema({
   },
   sender : {
     type : String,
-    index : true, 
+    index : true,
     ref : "User",
     required : true
   },
@@ -20,13 +20,6 @@ const Message = mongoose.model("Message",new Schema({
     ref : "User",
     required : true
   },
-  media : [
-    {type: String, default:null, required : false}
-  ],
-  message : {
-    type : String,
-    required : false
-  },
-},{timestamps:true}));
+ },{timestamps:true}));
 
 export default Message;

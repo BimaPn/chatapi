@@ -30,7 +30,7 @@ const userSchema = new Schema({
   },
   bio : {
     type : String,
-    required : false,
+    required : true,
     minLength : [4, "Please enter a valid bio with at least 4 characters."],
     maxLength : [50, "Bio must not exceed 50 characters."],
     default : "Hallo everyone !"
@@ -38,7 +38,7 @@ const userSchema = new Schema({
   avatar : {
     type : String,
     required : [true, "Name is required."],
-    default : `${process.env.APP_URL}/images/users/default.jpg`
+    default : `${process.env.APP_URL}/images/user/default.jpg`
   },
   email : {
     type : String,
