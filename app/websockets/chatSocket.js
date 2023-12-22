@@ -18,11 +18,7 @@ const chatSocketHandlers = (io) => {
       if("message" in message) {
         content = {message : message.message};
       }else {
-        const savedImages = [];
-        for(const image of message.images) {
-          savedImages.push(await saveFile(image,"images/message"));
-        }
-        content = {images : savedImages};
+        content = {media: message.media};
       }
       
       const finalMessage = {
@@ -30,11 +26,6 @@ const chatSocketHandlers = (io) => {
         receiver:to,
         ...content
       }    
-      await Message.create(finalMessage).catch((err) => {
-        socket.emit("messageError",err);
-        console.log(err);
-        return;
-      });
 
       const chat = {
         username:username,
