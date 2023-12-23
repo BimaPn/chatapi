@@ -11,9 +11,8 @@ export const handleLogin = async (req, res) => {
   if(!email || !password) {
     return res.status(400).json({message : "Email and password are required"}); 
   } 
-  const foundUser = await User.findOne({ email }).select({password:1,username:1}).exec();
+  const foundUser = await User.findOne({ email }).select({_id:1,password:1,username:1}).exec();
   if(!foundUser) return res.status(401).json({message : "User not found"}); 
-  
   const match = await bcrypt.compare(password,foundUser.password);
   if(!match) {
     return res.status(401).json({message : "Email or password is incorrect"})
@@ -22,7 +21,7 @@ export const handleLogin = async (req, res) => {
   const accessToken = sign(
     {
       user : {
-        username : foundUser.username,
+        id : foundUser.id,
       }
     },
     process.env.ACCESS_TOKEN_SECRET,
@@ -44,7 +43,7 @@ export const handleLogin = async (req, res) => {
     secure: false,
     maxAge: 24 * 60 * 60 * 30 });
 
-  const result = await getUserCache(foundUser.username).catch((err) => {
+  const result = await getUserCache(foundUser.id).catch((err) => {
     return res.status(500).json({message : "Internal server error."})
   });
   res.json({
@@ -69,7 +68,7 @@ export const handleRefreshToken = async (req, res) => {
             const accessToken = sign(
                 {
                   user : {
-                    username : foundUser.username,
+                    id : foundUser.id,
                   } 
                 },
                 process.env.ACCESS_TOKEN_SECRET,
@@ -112,7 +111,7 @@ export const handleLogout = async (req, res) => {
 
     await client.hDel(`users:${foundUser.id}`);
     res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure:false });
-    res.status(200).json({message : "success"});
+    res.json({message : "success"});
 }
 
 

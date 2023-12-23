@@ -5,12 +5,18 @@ import client from "../lib/redis/redisConnect.js";
 
 export const getUserMessages = async (req,res) => {
   const target = req.params.username;
-  const auth = req.user.username;
+  const auth = req.user.id;
+
+  const userTarget = await User.findOne({ username: target }).exec();
+  if(!userTarget) return res.status(404).json({message:"User not found."});
+
+  const { id, username, name, avatar, bio } = userTarget;
+
   const messages = await Message.find(
     {
       $or: [
-        {sender: auth,receiver:target},
-        {sender:target,receiver: auth}
+        {sender: auth,receiver:id},
+        {sender:id,receiver: auth}
       ]
     }
   ).sort({createdAt:1}).exec();
@@ -30,29 +36,24 @@ export const getUserMessages = async (req,res) => {
     }
   });
 
-  const userTarget = await User.findOneFilter({ username: target }).exec();
-  if(!userTarget) return res.status(404).json({message:"User not found."})
 
-  const { username, name, avatar, bio } = userTarget;
-  const isOnline = await client.exists(`online:${username}`); 
-  res.status(200).json({
+  const isOnline = await client.exists(`online:${id}`); 
+  res.json({
     message:"Success.",
-    user:{
-      username,
-      name,
-      avatar,
-      bio
-    },
+    user:{ id, username, name, avatar, bio },
     messages:newMessages,
     isOnline: isOnline
     });
 }
 
 export const createMessage = async (req, res) => {
-  const username = req.params.username;
+  const targetId = req.params.id;
   const files = req.files["files[]"];
   const { message } = req.body;
-  
+
+  const userTarget = await User.findOne({ _id:targetId }).exec();
+  if(!userTarget) return res.status(404).json({message:"User not found."});
+
   if(!files && !message) {
     return res.status(400).json({
       message: "Media or message required."
@@ -60,8 +61,8 @@ export const createMessage = async (req, res) => {
   }
   
   const relation = {
-    sender: req.user.username,
-    receiver: username
+    sender: req.user.id,
+    receiver: targetId 
   } 
 
   const finalMessage = {};
@@ -81,7 +82,6 @@ export const createMessage = async (req, res) => {
       return res.status(400).json({type:"media",errors:err.errors}); 
     }
   }
-
   if(message) {
     try {
       const createdMessage = await Message.create({
@@ -96,15 +96,14 @@ export const createMessage = async (req, res) => {
       return res.status(400).json({type:"message",errors:err.errors}); 
     }
   }
-
-  return res.status(200).json({
+  res.json({
     createdAt: dateToTime(new Date()),
     ...finalMessage 
   });
 }
 
 export const getUsersList = async (req,res) => {
-  const auth = req.user.username;
+  const auth = req.user.id;
   const messages = await Message.aggregate([
     {
         $match: {
@@ -138,11 +137,10 @@ export const getUsersList = async (req,res) => {
   if(!messages) {
     return res.json({users:[]});
   }
-
   // !! TEMPORARY SOLUTION, YOU MUST CHANGE LATER 
   const result = await Promise.all(messages.map( async (data) => {
     const user = await User.findOne(
-      {username:data.sender === auth ? data.receiver : data.sender }).exec();
+      {_id:data.sender === auth ? data.receiver : data.sender }).exec();
 
     return {
       username: user.username,
@@ -155,8 +153,7 @@ export const getUsersList = async (req,res) => {
     }
   }));
   // TEMPORARY SOLUTION, YOU MUST CHANGE LATER !!
-
-  res.status(200).json({users:result});
+  res.json({users:result});
 }
 
 

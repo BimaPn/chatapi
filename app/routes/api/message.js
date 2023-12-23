@@ -3,18 +3,18 @@ import { createMessage, getUserMessages,getUsersList } from '../../controllers/m
 import { initMulter } from '../../utils/storage.js';
 
 export const router = express.Router();
-const upload = initMulter("images/message", (1024*1024)*50)
+const upload = initMulter("media/message", (1024*1024)*50)
 .fields([
   {name:"files[]",maxCount:50}
 ]);
 
 router.route("/users/:username/messages")
-.post(getUserMessages);
+.get(getUserMessages);
 
 router.route("/chat/list")
-.post(getUsersList);
+.get(getUsersList);
 
-router.route("/messages/:username/create")
+router.route("/messages/:id/create")
 .post(function (req, res, next) {
   upload(req, res, function (err) {
     if (err) {

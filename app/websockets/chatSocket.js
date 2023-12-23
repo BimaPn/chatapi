@@ -7,11 +7,11 @@ import path from "path";
 const chatSocketHandlers = (io) => {
   const chat = io.of("/chat");
   chat.on("connection",async (socket) => {
-    const username = socket.user.username;
-    console.log(`${username} connect`);
-    socket.join(username);
-    socket.broadcast.emit("onlineUser",username,true);
-    await client.set(`online:${username}`,1);
+    const auth = socket.user.id;
+    console.log(`${auth} connect`);
+    socket.join(auth);
+    socket.broadcast.emit("onlineUser",auth,true);
+    await client.set(`online:${auth}`,1);
 
     socket.on("message",async ({message,to}) => {
       let content = {};
@@ -20,33 +20,29 @@ const chatSocketHandlers = (io) => {
       }else {
         content = {media: message.media};
       }
-      
-      const finalMessage = {
-        sender:username,
-        receiver:to,
-        ...content
-      }    
-
       const chat = {
-        username:username,
+        username:socket.user.username,
         name:socket.user.name,
         createdAt:message.createdAt,
         avatar:socket.user.avatar,
         message:message.message ? message.message : "images",
-        unread: await client.incrBy(`unread:${to}-${username}`,1),
+        unread: await client.incrBy(`unread:${to}-${auth}`,1),
       }
+      socket.to(to).to(auth).emit("message",{content,from:chat});
+    });
 
-      socket.to(to).to(username).emit("message",{content,from:chat});
+    socket.on("friendRequest", async (to) => {
+      socket.to(to).emit("friendRequest",{ status:true, from: auth });
     });
 
     socket.on("messagesRead", async (target) => {
-      await client.del(`unread:${username}-${target}`);
-    })
+      await client.del(`unread:${auth}-${target}`);
+    });
     
     socket.on("disconnect",async (msg) => {
-      socket.broadcast.emit("onlineUser",username,false);
-      await client.del(`online:${username}`);
-      console.log(`${username} disconnect`);
+      socket.broadcast.emit("onlineUser",auth,false);
+      await client.del(`online:${auth}`);
+      console.log(`${auth} disconnect`);
     });
   });
 }

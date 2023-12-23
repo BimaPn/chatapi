@@ -38,7 +38,7 @@ const userSchema = new Schema({
   avatar : {
     type : String,
     required : [true, "Name is required."],
-    default : `${process.env.APP_URL}/images/user/default.jpg`
+    default : `${process.env.APP_URL}/media/user/default.jpg`
   },
   email : {
     type : String,
