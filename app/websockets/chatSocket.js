@@ -31,8 +31,8 @@ const chatSocketHandlers = (io) => {
       socket.to(to).to(auth).emit("message",{content,from:chat});
     });
 
-    socket.on("friendRequest", async (to) => {
-      socket.to(to).emit("friendRequest",{ status:true, from: auth });
+    socket.on("friendRequest", async (to, status) => {
+      socket.to(to).emit("friendRequest",auth, status);
     });
 
     socket.on("messagesRead", async (target) => {

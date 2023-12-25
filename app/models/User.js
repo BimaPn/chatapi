@@ -51,6 +51,18 @@ const userSchema = new Schema({
       message: 'Invalid email address format',
     },
   },
+  friends : [
+    {
+      user:{
+        type: String,
+        ref: "User"
+      },
+      status:{
+        type: Number,
+        enums: [1, 2, 3]
+      }
+    }
+  ],
   password : {
     type : String,
     select : false,

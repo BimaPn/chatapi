@@ -45,22 +45,83 @@ export const updateUser = async (req,res) => {
   });
 }
 
+export const checkFriend = async (req, res) => {
+  const target = req.params.id;
+  const auth = req.user.id;
+
+  const user = await User.findOne({_id:auth,"friends.user":target},
+  {"friends.$":1})
+
+  let status;
+  if(user) {
+    status = `${user.friends[0].status}`;
+  }else {
+    status = "0";
+  }
+  res.json({
+    status
+  });
+}
+
+export const deleteFriend = async (req, res) => {
+  const target = req.params.id;
+  const auth = req.user.id;
+  try {
+    await User.updateOne(
+      {_id: auth},
+      {$pull: {friends:{user:target}}}
+    );
+    await User.updateOne(
+      {_id: target},
+      {$pull: {friends:{user:auth}}}
+    );
+  } catch (err) {
+   return res.status(400).json({errors:err}); 
+  }
+  res.json({
+    status: "0"
+  });
+}
+
 export const friendRequest = async (req, res) => {
-  // const username = req.params.username;
-  // const userTarget = await User.findOne({ username }).exec();
-  // if(!userTarget) {
-  //   return res.status(404).json({message:"User not found."});
-  // } 
-  // try {
-  //   await FriendRequest.create({
-  //     sender: req.user.username,
-  //     receiver: username,
-  //   });
-  // } catch (err) {
-  //  return res.status(400).json({errors:err.errors}); 
-  // }
-  // res.json({
-  //   message: "success"
-  // });
+  const target = req.params.id;
+  const auth = req.user.id;
+  try {
+    await User.updateOne(
+      {_id: auth, "friends.user": {$ne: target}},
+      {$push: {friends: {user: target, status: 1}}}
+    );
+    await User.updateOne(
+      {_id: target, "friends.user": {$ne: auth}},
+      {$push: {friends: {user: auth, status: 2}}}
+    );
+  } catch (err) {
+   return res.status(400).json({errors:err.errors}); 
+  }
+  res.json({
+    status: "1"
+  });
 } 
+
+export const acceptFriendRequest = async (req, res) => {
+  const target = req.params.id;
+  const auth = req.user.id;
+  try {
+    await User.updateOne(
+      {_id: auth, "friends.user": target},
+      {$set: {"friends.$.status":3}}
+    );
+    await User.updateOne(
+      {_id: target, "friends.user": auth},
+      {$set: {"friends.$.status":3}}
+    );
+  } catch (err) {
+   return res.status(400).json({errors:err.errors}); 
+  }
+  res.json({
+    status: "3"
+  });
+} 
+
+
 
