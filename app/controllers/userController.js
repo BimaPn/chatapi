@@ -1,4 +1,3 @@
-import { v4 as uuid } from "uuid";
 import User from "../models/User.js";
 import { deleteFile } from "../utils/storage.js";
 import client from "../lib/redis/redisConnect.js";

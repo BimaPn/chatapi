@@ -9,6 +9,8 @@ import mongoose from 'mongoose';
 import cookieParser from "cookie-parser";
 import connectDB from './app/config/dbConn.js'; 
 import { socketAuth } from "./app/middleware/verifyJWT.js";
+import "./app/lib/cron/removeStoryMediaTask.js"
+
 connectDB();
 const PORT = process.env.PORT || 3500;
 const server = createServer(app);

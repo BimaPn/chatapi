@@ -42,7 +42,7 @@ export const saveFile = async (file,filePath) => {
 export const deleteFile = (destination) => {
   unlink(destination, (err) => {
   if (err) {
-    throw err;
+   return "Failed."; 
   }
 });
 }
