@@ -4,9 +4,6 @@ import client from "../lib/redis/redisConnect.js";
 export const addStory = async (req, res)=> {
   const caption = req.body.caption;
   const media = req.file;
-  if(!caption && !media) {
-    return res.status(400).json({message:"Caption or media is required."})
-  }
 
   const story = {
     createdBy: req.user.id
