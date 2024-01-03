@@ -59,6 +59,7 @@ const userSchema = new Schema({
       },
       status:{
         type: Number,
+        index: true,
         enums: [1, 2, 3]
       }
     }

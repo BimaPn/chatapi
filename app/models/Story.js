@@ -24,9 +24,16 @@ const storySchema = new Schema({
     maxLength : [50, "Caption must not exceed 50 characters."],
     required : false
   },
+  hasSeen : [
+    {
+      type: String,
+      ref: "User",
+      index: true
+    }
+  ]
 },{timestamps:true})
 
-storySchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 });
+storySchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 });
 
 const Story = mongoose.model("Story",storySchema);
 export default Story;

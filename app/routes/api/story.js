@@ -1,5 +1,5 @@
 import express from 'express';
-import { addStory } from '../../controllers/storyController.js';
+import { addStory, getFriendsLastStory } from '../../controllers/storyController.js';
 import { initMulter } from '../../utils/storage.js';
 
 export const router = express.Router();
@@ -15,4 +15,7 @@ router.route("/add")
     next();
   });
 }, addStory);
+
+router.route("/friends-last-story/get")
+.get(getFriendsLastStory);
 
