@@ -1,5 +1,5 @@
 import express from 'express';
-import { addStory, deleteStory, getFriendsLastStory } from '../../controllers/storyController.js';
+import { addStory, deleteStory, getFriendsLastStory, getUserStories, seenStory } from '../../controllers/storyController.js';
 import { initMulter } from '../../utils/storage.js';
 
 export const router = express.Router();
@@ -18,6 +18,12 @@ router.route("/add")
 
 router.route("/friends-last-story/get")
 .get(getFriendsLastStory);
+
+router.route("/user-stories/:id/get")
+.get(getUserStories);
+
+router.route("/:id/seen")
+.post(seenStory);
 
 router.route("/:id/delete")
 .delete(deleteStory);

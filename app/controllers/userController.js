@@ -7,7 +7,7 @@ export const updateUser = async (req,res) => {
   const { name, bio } = req.body;
   let avatar;
 
-  const user = await User.findOne({ _id:auth });
+  const user = await User.findOne({ _id:auth }).exec();
   if(!user){
       res.status(400).json({message:"user not found"});
   }
@@ -49,7 +49,7 @@ export const checkFriend = async (req, res) => {
   const auth = req.user.id;
 
   const user = await User.findOne({_id:auth,"friends.user":target},
-  {"friends.$":1})
+  {"friends.$":1}).exec();
 
   let status;
   if(user) {
@@ -69,11 +69,11 @@ export const deleteFriend = async (req, res) => {
     await User.updateOne(
       {_id: auth},
       {$pull: {friends:{user:target}}}
-    );
+    ).exec();
     await User.updateOne(
       {_id: target},
       {$pull: {friends:{user:auth}}}
-    );
+    ).exec();
   } catch (err) {
    return res.status(400).json({errors:err}); 
   }
@@ -89,11 +89,11 @@ export const friendRequest = async (req, res) => {
     await User.updateOne(
       {_id: auth, "friends.user": {$ne: target}},
       {$push: {friends: {user: target, status: 1}}}
-    );
+    ).exec();
     await User.updateOne(
       {_id: target, "friends.user": {$ne: auth}},
       {$push: {friends: {user: auth, status: 2}}}
-    );
+    ).exec();
   } catch (err) {
    return res.status(400).json({errors:err.errors}); 
   }
@@ -109,11 +109,11 @@ export const acceptFriendRequest = async (req, res) => {
     await User.updateOne(
       {_id: auth, "friends.user": target},
       {$set: {"friends.$.status":3}}
-    );
+    ).exec();
     await User.updateOne(
       {_id: target, "friends.user": auth},
       {$set: {"friends.$.status":3}}
-    );
+    ).exec();
   } catch (err) {
    return res.status(400).json({errors:err.errors}); 
   }

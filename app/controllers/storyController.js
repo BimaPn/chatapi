@@ -43,19 +43,74 @@ export const deleteStory =  async (req, res) => {
   });
 }
 
+export const seenStory = async (req, res) => {
+  const id = req.params.id;
+  const auth = req.user.id;
+
+  const result = await Story.updateOne(
+    { _id: id, "hasSeen": { $ne: auth } },
+    { $addToSet: { hasSeen: auth } }
+  );
+  if(result.modifiedCount <= 0) {
+    return res.status(400).json({
+      error: "failed to update"
+    });
+  }
+ res.json({
+   message: "success"
+ });
+}
+
+export const getUserStories = async (req, res) => {
+  const userId = req.params.id;
+  const stories = await Story.aggregate([
+    {
+      $match: { createdBy:"5d3e85c5-3756-451c-866f-e9bdbfed8c4d" }
+    },
+    {
+      $group: {
+        _id:null,
+        hasSeen: {$push: {
+          $in: [auth, "$hasSeen"]
+        }},
+        contents: {
+          $push: {
+            media: "$media",
+            createdAt: "$createdAt"
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        position: {
+          $indexOfArray: ["$hasSeen", false]
+        },
+        contents: 1
+      }
+    }
+  ]);
+
+  res.json({
+    stories
+  });
+}
+
 export const getFriendsLastStory = async (req, res) => {
   const auth = req.user.id;
 
   const userStory = await Story.findOne({ createdBy:auth },null,{sort:{ "createdAt":-1 }})
-    .select({ createdAt: 1 })
-    .exec();
+  .select({ createdAt: 1 })
+  .exec();
+
   const lastStories = await User.aggregate([
   { $match: { _id: auth } },
   {
-    $unwind: '$friends',
+    $match: { 'friends.status': 3 },
   },
   {
-    $match: { 'friends.status': 3 },
+    $unwind: '$friends',
   },
   {
     $lookup: {
@@ -66,37 +121,38 @@ export const getFriendsLastStory = async (req, res) => {
     },
   },
   {
-    $unwind: '$friendStories',
-  },
-  {
     $lookup: {
       from: 'users',
-      localField: 'friendStories.createdBy',
+      localField: 'friends.user',
       foreignField: '_id',
-      as: 'friendDetails',
+      as: 'friendDetail',
     },
+  },
+  {
+    $unwind: '$friendStories',
   },
   {
     $sort: { 'friendStories.createdAt': -1 },
   },
   {
     $group: {
-      _id: '$friendStories.createdBy',
+      _id: '$friends.user',
+      friendDetail: {$first: { $arrayElemAt: ['$friendDetail', 0] }},
       lastStory: { $first: '$friendStories' },
-      userInfo: { $first:  '$friendDetails'},
+      hasSeen: {
+        $max: { $in: [auth, '$friendStories.hasSeen'] },
+      },
     },
   },
   {
-  $project: {
-    id:"$friends.user",
-    name: { $arrayElemAt: ['$userInfo.name', 0] },
-    avatar: { $arrayElemAt: ['$userInfo.avatar', 0] },
-    hasSeen: {
-      $in: [auth, '$lastStory.hasSeen'],
-    },
-    createdAt: "$lastStory.createdAt"
+    $project: {
+      _id: "$_id",
+      avatar: "$friendDetail.avatar",
+      name: "$friendDetail.name",
+      createdAt: "$lastStory.createdAt",
+      hasSeen: "$hasSeen"
+    }
   }
-  },
   ]);
 
   res.json({
