@@ -24,11 +24,31 @@ export const addStory = async (req, res)=> {
     return res.status(400).json({errors:err.errors}); 
   }
 
-  return res.json({ message:"success" })
+  res.json({ message:"success" })
+}
+
+export const deleteStory =  async (req, res) => {
+  const id = req.params.id;
+  const auth = req.user.id;
+
+  const story = await Story.deleteOne({ _id:id, createdBy: auth }); 
+
+  if(story.deletedCount !== 1) {
+    return res.status(400).json({
+      error: "Document not found or not deleted"
+    });
+  }
+  res.json({
+    message: "success"
+  });
 }
 
 export const getFriendsLastStory = async (req, res) => {
   const auth = req.user.id;
+
+  const userStory = await Story.findOne({ createdBy:auth },null,{sort:{ "createdAt":-1 }})
+    .select({ createdAt: 1 })
+    .exec();
   const lastStories = await User.aggregate([
   { $match: { _id: auth } },
   {
@@ -71,6 +91,9 @@ export const getFriendsLastStory = async (req, res) => {
     id:"$friends.user",
     name: { $arrayElemAt: ['$userInfo.name', 0] },
     avatar: { $arrayElemAt: ['$userInfo.avatar', 0] },
+    hasSeen: {
+      $in: [auth, '$lastStory.hasSeen'],
+    },
     createdAt: "$lastStory.createdAt"
   }
   },
@@ -78,6 +101,7 @@ export const getFriendsLastStory = async (req, res) => {
 
   res.json({
     message: "success",
+    userStory: userStory,
     stories: lastStories
   })
 }
