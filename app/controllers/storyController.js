@@ -1,6 +1,7 @@
 import Story from "../models/Story.js";
 import client from "../lib/redis/redisConnect.js";
 import User from "../models/User.js";
+import { dateToTime } from "../utils/converter.js";
 
 export const addStory = async (req, res)=> {
   const caption = req.body.caption;
@@ -63,9 +64,11 @@ export const seenStory = async (req, res) => {
 
 export const getUserStories = async (req, res) => {
   const userId = req.params.id;
+  const auth = req.user.id;
+
   const stories = await Story.aggregate([
     {
-      $match: { createdBy:"5d3e85c5-3756-451c-866f-e9bdbfed8c4d" }
+      $match: { createdBy: userId }
     },
     {
       $group: {
@@ -75,8 +78,9 @@ export const getUserStories = async (req, res) => {
         }},
         contents: {
           $push: {
+            id: "$_id",
             media: "$media",
-            createdAt: "$createdAt"
+            createdAt: "$createdAt",
           }
         }
       }
@@ -84,6 +88,13 @@ export const getUserStories = async (req, res) => {
     {
       $project: {
         _id: 0,
+        seenStories : {
+          $cond: {
+            if: { $ne: [userId, auth] },
+            then: "$hasSeen",
+            else: null
+          }
+        },
         position: {
           $indexOfArray: ["$hasSeen", false]
         },
@@ -93,7 +104,8 @@ export const getUserStories = async (req, res) => {
   ]);
 
   res.json({
-    stories
+    user: auth,
+    stories:stories[0]
   });
 }
 
@@ -140,7 +152,7 @@ export const getFriendsLastStory = async (req, res) => {
       friendDetail: {$first: { $arrayElemAt: ['$friendDetail', 0] }},
       lastStory: { $first: '$friendStories' },
       hasSeen: {
-        $max: { $in: [auth, '$friendStories.hasSeen'] },
+        $min: { $in: [auth, '$friendStories.hasSeen'] },
       },
     },
   },
@@ -156,8 +168,7 @@ export const getFriendsLastStory = async (req, res) => {
   ]);
 
   res.json({
-    message: "success",
-    userStory: userStory,
+    userStory: userStory ? dateToTime(userStory.createdAt) : null,
     stories: lastStories
   })
 }
