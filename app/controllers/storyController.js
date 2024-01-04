@@ -96,7 +96,11 @@ export const getUserStories = async (req, res) => {
           }
         },
         position: {
-          $indexOfArray: ["$hasSeen", false]
+          $cond: {
+            if: { $eq: [{ $indexOfArray: ["$hasSeen", false] }, -1] },
+            then: 0,
+            else: { $indexOfArray: ["$hasSeen", false] }
+          }
         },
         contents: 1
       }
