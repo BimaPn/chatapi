@@ -10,8 +10,8 @@ const chatSocketHandlers = (io) => {
     const auth = socket.user.id;
     console.log(`${auth} connect`);
     socket.join(auth);
-    socket.broadcast.emit("onlineUser",auth,true);
-    await client.set(`online:${auth}`,1);
+    await client.hSet("online",auth,auth);
+    socket.broadcast.emit("onlineUser",auth.username,true);
 
     socket.on("message",async ({message,to}) => {
       let content = {};
@@ -26,7 +26,7 @@ const chatSocketHandlers = (io) => {
         createdAt:message.createdAt,
         avatar:socket.user.avatar,
         message:message.message ? message.message : "images",
-        unread: await client.incrBy(`unread:${to}-${auth}`,1),
+        unread: await client.incrBy(`unread:${to}-${auth.username}`,1),
       }
       socket.to(to).to(auth).emit("message",{content,from:chat});
     });
@@ -36,12 +36,12 @@ const chatSocketHandlers = (io) => {
     });
 
     socket.on("messagesRead", async (target) => {
-      await client.del(`unread:${auth}-${target}`);
+      await client.del(`unread:${auth.username}-${target}`);
     });
     
     socket.on("disconnect",async (msg) => {
-      socket.broadcast.emit("onlineUser",auth,false);
-      await client.del(`online:${auth}`);
+      socket.broadcast.emit("onlineUser",auth.username,false);
+      await client.hDel("online",auth);
       console.log(`${auth} disconnect`);
     });
   });

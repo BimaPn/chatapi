@@ -19,13 +19,11 @@ export const addStory = async (req, res)=> {
     story.media = `${process.env.APP_URL}/media/story/${fileName}`;
     await client.zAdd("storyMedia", {score: Date.now() + (24 * 60 * 60 * 1000), value: basePath});
   }
-  try {
-    await Story.create(story);
-  } catch (err) {
+  const result = await Story.create(story);
+  if(!result) {
     return res.status(400).json({errors:err.errors}); 
   }
-
-  res.json({ message:"success" })
+  res.json({ story:result });
 }
 
 export const deleteStory =  async (req, res) => {

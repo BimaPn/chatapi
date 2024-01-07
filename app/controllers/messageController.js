@@ -37,7 +37,7 @@ export const getUserMessages = async (req,res) => {
   });
 
 
-  const isOnline = await client.exists(`online:${id}`); 
+  const isOnline = await client.hExists("online",id); 
   res.json({
     message:"Success.",
     user:{ id, username, name, avatar, bio },
@@ -149,7 +149,7 @@ export const getUsersList = async (req,res) => {
       message:data.message? data.message : "images",
       createdAt:dateToTime(data.createdAt),
       unread: await client.get(`unread:${auth}-${user.username}`),
-      isOnline : await client.exists(`online:${user.username}`)
+      isOnline : await client.hExists("online",user.id)
     }
   }));
   // TEMPORARY SOLUTION, YOU MUST CHANGE LATER !!

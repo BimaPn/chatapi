@@ -2,14 +2,12 @@ import app from "./app/app.js";
 import { createServer } from "http"
 import { Server } from "socket.io"
 import chatSocketHandlers from "./app/websockets/chatSocket.js";
-import roomSocketHandlers from "./app/websockets/roomSocket.js";
 import 'dotenv/config.js';
-import sessionMiddleware from "./app/middleware/session.js";
 import mongoose from 'mongoose';
-import cookieParser from "cookie-parser";
 import connectDB from './app/config/dbConn.js'; 
 import { socketAuth } from "./app/middleware/verifyJWT.js";
 import "./app/lib/cron/removeStoryMediaTask.js"
+import storiesSocketHandlers from "./app/websockets/storiesSocket.js";
 
 connectDB();
 const PORT = process.env.PORT || 3500;
@@ -21,21 +19,17 @@ const io = new Server(server,{
   maxHttpBufferSize:1e8,
 });
 
-// Add socket middleware
 io.use(socketAuth);
 io.on("new_namespace",(namespace) => {
   namespace.use(socketAuth);
 });
 
-// Socket implementations
-io.on("connection",(socket) => {
-  console.log("user has connect : ",socket.id);
-});
-
 chatSocketHandlers(io);
-roomSocketHandlers(io);
+storiesSocketHandlers(io);
 
 mongoose.connection.once('open',() => {
-  server.listen(PORT,()=> console.log(`server starting on port ${PORT}`));
+  server.listen(PORT,()=> {
+    console.log(`server starting on port ${PORT}`);
+  });
 });
 
