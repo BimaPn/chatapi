@@ -31,6 +31,10 @@ const chatSocketHandlers = (io) => {
       socket.to(to).to(auth).emit("message",{content,from:chat});
     });
 
+    socket.on("typing", (target, isTyping) => {
+      socket.to(target).emit("typing",auth, isTyping);
+    });
+
     socket.on("friendRequest", async (to, status) => {
       socket.to(to).emit("friendRequest",auth, status);
     });
