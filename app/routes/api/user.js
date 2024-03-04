@@ -1,5 +1,5 @@
 import express from 'express'
-import { updateUser, friendRequest, checkFriend, deleteFriend, acceptFriendRequest } from '../../controllers/userController.js'
+import { updateUser, friendRequest, checkFriend, deleteFriend, acceptFriendRequest, searchUsers } from '../../controllers/userController.js'
 import { initMulter } from '../../utils/storage.js';
 
 export const router = express.Router();
@@ -14,6 +14,9 @@ router.route("/profile/update")
     next();
   });
 }, updateUser);
+
+router.route(`/search`)
+.get(searchUsers);
 
 router.route("/:id/friend-request")
 .get(checkFriend)

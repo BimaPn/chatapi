@@ -44,6 +44,18 @@ export const updateUser = async (req,res) => {
   });
 }
 
+export const searchUsers = async (req, res) => {
+  const username = req.query.username;
+  try {
+    const users = await User.find({username: {$regex: username, $options: "i"}},"name username bio avatar").limit(15)
+    res.json({
+      users
+    });
+  } catch (err) {
+    res.status(500).json({message: "There is something wrong."});
+  }
+} 
+
 export const checkFriend = async (req, res) => {
   const target = req.params.id;
   const auth = req.user.id;

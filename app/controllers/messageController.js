@@ -68,7 +68,7 @@ export const createMessage = async (req, res) => {
   const finalMessage = {};
 
   if(files) {
-    const media = files.map((file) => `${process.env.APP_URL}/images/message/${file.filename}`)
+    const media = files.map((file) => `${process.env.APP_URL}/media/message/${file.filename}`)
     try {
       const createdMedia = await Message.create({
         ...relation,
