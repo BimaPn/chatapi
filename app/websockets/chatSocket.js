@@ -11,7 +11,7 @@ const chatSocketHandlers = (io) => {
     console.log(`${auth} connect`);
     socket.join(auth);
     await client.hSet("online",auth,auth);
-    socket.broadcast.emit("onlineUser",auth.username,true);
+    socket.broadcast.emit("onlineUser",socket.user.username,true);
 
     socket.on("message",async ({message,to}) => {
       let content = {};
@@ -44,7 +44,7 @@ const chatSocketHandlers = (io) => {
     });
     
     socket.on("disconnect",async (msg) => {
-      socket.broadcast.emit("onlineUser",auth.username,false);
+      socket.broadcast.emit("onlineUser",socket.user.username,false);
       await client.hDel("online",auth);
       console.log(`${auth} disconnect`);
     });
