@@ -1,6 +1,6 @@
 import Message from "../models/Message.js";
 import User from "../models/User.js"
-import { dateToTime } from '../utils/converter.js'
+import { dateToTime, dateToYMD } from '../utils/converter.js'
 import client from "../lib/redis/redisConnect.js";
 
 export const getUserMessages = async (req,res) => {
@@ -32,7 +32,8 @@ export const getUserMessages = async (req,res) => {
       id:item._id,
       ...content,
       isCurrentUser: item.sender === auth ? true : false,
-      createdAt: dateToTime(item.createdAt)
+      createdAt: dateToTime(item.createdAt),
+      date: dateToYMD(item.createdAt)
     }
   });
 
@@ -98,6 +99,7 @@ export const createMessage = async (req, res) => {
   }
   res.json({
     createdAt: dateToTime(new Date()),
+    date: dateToYMD(new Date()),
     ...finalMessage 
   });
 }
@@ -148,7 +150,7 @@ export const getUsersList = async (req,res) => {
       avatar:user.avatar,
       message:data.message? data.message : "images",
       createdAt:dateToTime(data.createdAt),
-      unread: await client.get(`unread:${auth}-${user.username}`),
+      unread: await client.get(`unread:${auth}-${user.id}`),
       isOnline : await client.hExists("online",user.id)
     }
   }));

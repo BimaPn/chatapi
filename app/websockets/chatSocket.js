@@ -8,9 +8,10 @@ const chatSocketHandlers = (io) => {
   const chat = io.of("/chat");
   chat.on("connection",async (socket) => {
     const auth = socket.user.id;
-    console.log(`${auth} connect`);
+    console.log(`${auth} : chat : connect`);
     socket.join(auth);
     await client.hSet("online",auth,auth);
+
     socket.broadcast.emit("onlineUser",socket.user.username,true);
 
     socket.on("message",async ({message,to}) => {
@@ -26,7 +27,7 @@ const chatSocketHandlers = (io) => {
         createdAt:message.createdAt,
         avatar:socket.user.avatar,
         message:message.message ? message.message : "images",
-        unread: await client.incrBy(`unread:${to}-${auth.username}`,1),
+        unread: await client.incrBy(`unread:${to}-${auth}`,1),
       }
       socket.to(to).to(auth).emit("message",{content,from:chat});
     });
@@ -40,7 +41,7 @@ const chatSocketHandlers = (io) => {
     });
 
     socket.on("messagesRead", async (target) => {
-      await client.del(`unread:${auth.username}-${target}`);
+      await client.del(`unread:${auth}-${target}`);
     });
     
     socket.on("disconnect",async (msg) => {
