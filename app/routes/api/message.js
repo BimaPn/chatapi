@@ -1,5 +1,5 @@
 import express from 'express';
-import { createMessage, getUserMessages,getUsersList } from '../../controllers/messageController.js';
+import { createMessage, deleteMessage, getUserMessages,getUsersList } from '../../controllers/messageController.js';
 import { initMulter } from '../../utils/storage.js';
 
 export const router = express.Router();
@@ -13,6 +13,9 @@ router.route("/users/:username/messages")
 
 router.route("/chat/list")
 .get(getUsersList);
+
+router.route("/messages/:id/delete")
+.delete(deleteMessage);
 
 router.route("/messages/:id/create")
 .post(function (req, res, next) {

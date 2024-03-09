@@ -104,6 +104,23 @@ export const createMessage = async (req, res) => {
   });
 }
 
+export const deleteMessage = async (req, res) => {
+  const messageId = req.params.id;
+
+  const deletedMessage = await Message.findOneAndDelete({_id:messageId}).exec();
+  if(!deletedMessage) {
+    return res.status(400).json({
+      message : "Failed to delete."
+    });
+  }
+
+  return res.json({
+    message: "Success",
+    receiverId : deletedMessage.receiver
+  })
+
+}
+
 export const getUsersList = async (req,res) => {
   const auth = req.user.id;
   const messages = await Message.aggregate([

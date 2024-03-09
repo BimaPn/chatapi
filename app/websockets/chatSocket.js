@@ -32,6 +32,10 @@ const chatSocketHandlers = (io) => {
       socket.to(to).to(auth).emit("message",{content,from:chat});
     });
 
+    socket.on("deleteMessage", (messageId, receiver) => {
+      socket.to(receiver).emit("deletedMessage", messageId);
+    })
+
     socket.on("typing", (target, isTyping) => {
       socket.to(target).emit("typing",auth, isTyping);
     });
