@@ -3,9 +3,14 @@ import User from "../models/User.js"
 import { dateToTime, dateToYMD } from '../utils/converter.js'
 import client from "../lib/redis/redisConnect.js";
 
+const getMessages = (page, limit,) => {
+  
+}
 export const getUserMessages = async (req,res) => {
   const target = req.params.username;
   const auth = req.user.id;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
 
   const userTarget = await User.findOne({ username: target }).exec();
   if(!userTarget) return res.status(404).json({message:"User not found."});
@@ -19,7 +24,7 @@ export const getUserMessages = async (req,res) => {
         {sender:id,receiver: auth}
       ]
     }
-  ).sort({createdAt:1}).exec();
+  ).sort({createdAt:-1}).skip((page-1) * limit).limit(limit).exec();
 
   let newMessages = messages.map((item) => {
     let content = {};
@@ -44,7 +49,7 @@ export const getUserMessages = async (req,res) => {
     user:{ id, username, name, avatar, bio },
     messages:newMessages,
     isOnline: isOnline
-    });
+  });
 }
 
 export const createMessage = async (req, res) => {
