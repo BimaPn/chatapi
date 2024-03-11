@@ -50,7 +50,7 @@ const getOnlineFriends = async (userId) => {
       },
     },
   ]);
-  return result[0].users ? result[0].user : [];
+  return result.length <= 0 ? [] : result[0].users;
 }
 
 export default storiesSocketHandlers;

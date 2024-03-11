@@ -78,6 +78,7 @@ export const getUserStories = async (req, res) => {
           $push: {
             id: "$_id",
             media: "$media",
+            caption: "$caption",
             createdAt: "$createdAt",
           }
         }
