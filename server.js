@@ -2,7 +2,7 @@ import app from "./app/app.js";
 import { createServer } from "http"
 import { Server } from "socket.io"
 import chatSocketHandlers from "./app/websockets/chatSocket.js";
-import 'dotenv/config.js';
+import 'dotenv/config';
 import mongoose from 'mongoose';
 import connectDB from './app/config/dbConn.js'; 
 import { socketAuth } from "./app/middleware/verifyJWT.js";

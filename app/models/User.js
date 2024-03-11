@@ -2,7 +2,6 @@ import mongoose from "mongoose"
 import { v4 as uuid } from "uuid"
 
 const { Schema } = mongoose;
-
 const userSchema = new Schema({
   _id : {
     type:String,
@@ -70,7 +69,7 @@ const userSchema = new Schema({
     required : [true, "Name is required."]
   },
   refreshToken : String,
-});
+},{timestamps:true});
 
 userSchema.statics.findOneFilter = function (query) {
   return this.findOne(query,{_id:0,name:1,username:1,email:1,avatar:1,bio:1});

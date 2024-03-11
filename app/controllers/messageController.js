@@ -3,9 +3,6 @@ import User from "../models/User.js"
 import { dateToTime, dateToYMD } from '../utils/converter.js'
 import client from "../lib/redis/redisConnect.js";
 
-const getMessages = (page, limit,) => {
-  
-}
 export const getUserMessages = async (req,res) => {
   const target = req.params.username;
   const auth = req.user.id;
@@ -15,8 +12,7 @@ export const getUserMessages = async (req,res) => {
   const userTarget = await User.findOne({ username: target }).exec();
   if(!userTarget) return res.status(404).json({message:"User not found."});
 
-  const { id, username, name, avatar, bio } = userTarget;
-
+  const { id, username, name, avatar, bio, createdAt } = userTarget;
   const messages = await Message.find(
     {
       $or: [
@@ -46,7 +42,7 @@ export const getUserMessages = async (req,res) => {
   const isOnline = await client.hExists("online",id); 
   res.json({
     message:"Success.",
-    user:{ id, username, name, avatar, bio },
+    user:{ id, username, name, avatar, bio, createdAt },
     messages:newMessages,
     isOnline: isOnline
   });
@@ -179,6 +175,11 @@ export const getUsersList = async (req,res) => {
   // TEMPORARY SOLUTION, YOU MUST CHANGE LATER !!
   res.json({users:result});
 }
+// export const searchUserMessage = async (res, req) => {
+//   const name = req.query.name;
+//   const users = await User.find({username: {$regex: username, $options: "i"}},"name username avatar").exec();
+//   
+// }
 
 
 

@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
-import 'dotenv/config.js';
 import { fileURLToPath } from "url";
+import 'dotenv/config';
 import cors from 'cors';
 import { corsOptions } from './config/cors.js';
 import sessionMiddleware from './middleware/session.js';
@@ -45,5 +45,4 @@ app.all('*',(req,res) => {
     }
 });
 app.use(errorHandler);
-
 export default app;
