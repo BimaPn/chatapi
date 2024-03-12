@@ -1,5 +1,6 @@
 import mongoose from "mongoose"
 import { v4 as uuid } from "uuid"
+import 'dotenv/config'
 
 const { Schema } = mongoose;
 const userSchema = new Schema({

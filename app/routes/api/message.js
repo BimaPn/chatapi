@@ -1,6 +1,7 @@
 import express from 'express';
 import { createMessage, deleteMessage, getUserMessages,getUsersList } from '../../controllers/messageController.js';
 import { initMulter } from '../../utils/storage.js';
+import { mediaPreview } from '../../controllers/MediaController.js';
 
 export const router = express.Router();
 const upload = initMulter("media/message", (1024*1024)*50)
@@ -26,3 +27,6 @@ router.route("/messages/:id/create")
     next();
   });
 }, createMessage);
+
+router.route("/messages/:id/media/preview")
+.get(mediaPreview);

@@ -1,7 +1,5 @@
 import { seedUser } from "./userSeeder.js"
 
-export { seedUser } from "./userSeeder.js"
-
 const runSeeder = async () => {
   // user seeder
   seedUser().then(() => {

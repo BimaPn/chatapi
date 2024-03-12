@@ -1,7 +1,6 @@
 import User from "../models/User.js"
 import bcrypt from "bcrypt"
 import connectDB, { disconnectDB } from '../config/dbConn.js'
-import 'dotenv/config'
 
 export const seedUser = async () => {
   connectDB();
